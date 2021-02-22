@@ -14,6 +14,8 @@ let directionY = 0;
 let applePosX = 0;
 let applePosY = 0;
 
+let snakeBody = [];
+
 const drawGameBoard = () => {
     for (let i = 0; i < canvas.height / gridSize; i++) {
         for (let j = 0; j < canvas.width / gridSize; j++) {
@@ -49,10 +51,7 @@ const drawHead = () => {
 
 const drawBody = () => {
     ctx.fillStyle = 'black';
-    ctx.fillRect(snakePosX - (elementSize * directionX),
-        (snakePosY - (elementSize * directionY)),
-        elementSize,
-        elementSize);
+    
 }
 
 const drawApple = () => {
