@@ -8,6 +8,8 @@ const snakeInitLength = 2;
 let snakeBodyLength = 2;
 let snakePosX = 300;
 let snakePosY = 250;
+let directionX = 0;
+let directionY = 0;
 
 const drawGameBoard = () => {
     ctx.fillStyle = 'green';
@@ -16,68 +18,59 @@ const drawGameBoard = () => {
 
 const drawHead = () => {
     ctx.fillStyle = 'red';
-    ctx.fillRect(snakePosX, snakePosY, snakeElementSize, snakeElementSize);
+
+    getDirection();
+
+    boundaryCheck();
+
+    ctx.fillRect(snakePosX += (snakeSpeed * directionX),
+        snakePosY += (snakeSpeed * directionY),
+        snakeElementSize,
+        snakeElementSize);
 }
 
 const drawBody = () => {
-    ctx.fillStyle = 'black';
-    for (let i = 1; i <= snakeBodyLength; i++) {
-        ctx.fillRect((snakePosX - (snakeElementSize * i)),
-            snakePosY, snakeElementSize, snakeElementSize);
+    ctx.beginPath();
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = snakeElementSize;
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, 0);
+    ctx.stroke();
+}
+
+function getDirection() {
+    window.addEventListener('keydown', (e) => {
+        switch (e.code) {
+            case 'ArrowUp':
+                directionX = 0;
+                directionY = -snakeSpeed;
+                break;
+            case 'ArrowDown':
+                directionX = 0;
+                directionY = snakeSpeed;
+                break;
+            case 'ArrowLeft':
+                directionX = -snakeSpeed;
+                directionY = 0;
+                break;
+            case 'ArrowRight':
+                directionX = snakeSpeed;
+                directionY = 0;
+                break;
+            default:
+                console.log('Ignored');
+                break;
+        }
+    });
+}
+
+function boundaryCheck() {
+    if (snakePosX <= 0 || snakePosX >= canvas.width - snakeElementSize) {
+        directionX = -directionX;
     }
-}
-
-window.addEventListener('keydown', (e) => {
-    switch (e.code) {
-        case 'ArrowUp':
-            moveUp(e.code);
-            break
-        case 'ArrowDown':
-            moveDown();
-            break
-        case 'ArrowLeft':
-            moveLeft();
-            break
-        case 'ArrowRight':
-            moveRight();
-            break
-        default:
-            console.log('Ignored');
-            break
+    if (snakePosY <= 0 || snakePosY >= canvas.height - snakeElementSize) {
+        directionY = -directionY;
     }
-})
-
-const moveUp = () => {
-    setInterval(() => {
-        snakePosX = snakePosX;
-        if (snakePosY > 0) {
-            snakePosY -= snakeSpeed;
-        }
-    }, 1000 / framesPerSecond);
-}
-
-const moveDown = () => {
-    setInterval(() => {
-        if (snakePosY < canvas.height - snakeElementSize) {
-            snakePosY += snakeSpeed;
-        }
-    }, 1000 / framesPerSecond);
-}
-
-const moveLeft = () => {
-    setInterval(() => {
-        if (snakePosX > 0) {
-            snakePosX -= snakeSpeed;
-        }
-    }, 1000 / framesPerSecond);
-}
-
-const moveRight = () => {
-    setInterval(() => {
-        if (snakePosX < canvas.width - snakeElementSize) {
-            snakePosX += snakeSpeed;
-        }
-    }, 1000 / framesPerSecond);
 }
 
 window.onload = function () {
