@@ -5,8 +5,8 @@ const framesPerSecond = 60;
 const gridSize = 25;
 let snakeSpeed = 2;
 const elementSize = 25;
-const snakeInitLength = 2;
-let snakeBodyLength = 5;
+const snakeInitLength = 25;
+let snakeBodyLength = 25;
 let snakePosX = 295;
 let snakePosY = 245;
 let directionX = 0;
@@ -15,6 +15,30 @@ let applePosX = 0;
 let applePosY = 0;
 
 let snakeBody = [];
+
+class SnakeBodySegment {
+    constructor(bodyPosX, bodyPosY, elementSize) {
+        this.bodyPosX = bodyPosX;
+        this.bodyPosY = bodyPosY;
+        this.width = elementSize;
+        this.height = elementSize;
+    }
+}
+
+const buildBody = () => {
+    const snakeSegment = new SnakeBodySegment(snakePosX, snakePosY, elementSize)
+    return snakeBody.unshift(snakeSegment);
+}
+
+const drawBody = () => {
+    buildBody();
+    snakeBody.forEach((elem) => {
+        ctx.fillStyle = 'black'
+        ctx.fillRect(elem.bodyPosX, elem.bodyPosY, elem.width, elem.height)
+    });
+    if (snakeBody.length > snakeBodyLength)
+        snakeBody.pop();
+}
 
 const drawGameBoard = () => {
     for (let i = 0; i < canvas.height / gridSize; i++) {
@@ -47,11 +71,6 @@ const drawHead = () => {
         snakePosY += (snakeSpeed * directionY),
         elementSize,
         elementSize);
-}
-
-const drawBody = () => {
-    ctx.fillStyle = 'black';
-    
 }
 
 const drawApple = () => {
@@ -106,6 +125,7 @@ const appleCheck = () => {
          (snakePosY + elementSize >= applePosY && snakePosY <= applePosY + elementSize)) {
         randomX();
         randomY();
+        snakeBodyLength += 5;
         console.log('COLLISION');
     }
 }
