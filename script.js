@@ -1,9 +1,9 @@
 const canvas = document.querySelector('#game-board');
 const ctx = canvas.getContext('2d');
 
-const framesPerSecond = 10;
+const framesPerSecond = 60;
 const gridSize = 25;
-let snakeSpeed = 10;
+let snakeSpeed = 2;
 const elementSize = 25;
 const snakeInitLength = 2;
 let snakeBodyLength = 5;
@@ -53,7 +53,6 @@ const drawBody = () => {
         (snakePosY - (elementSize * directionY)),
         elementSize,
         elementSize);
-
 }
 
 const drawApple = () => {
@@ -74,19 +73,27 @@ function getDirection() {
         switch (e.code) {
             case 'ArrowUp':
                 directionX = 0;
-                directionY = -1;
+                if (directionY === 1) {
+                    return;
+                } else directionY = -1;
                 break;
             case 'ArrowDown':
                 directionX = 0;
-                directionY = 1;
+                if (directionY === -1) {
+                    return;
+                } else directionY = 1;
                 break;
             case 'ArrowLeft':
-                directionX = -1;
                 directionY = 0;
+                if (directionX === 1) {
+                    return;
+                } else  directionX = -1;
                 break;
             case 'ArrowRight':
-                directionX = 1;
                 directionY = 0;
+                if (directionX === -1) {
+                    return;
+                } else directionX = 1;
                 break;
             default:
                 console.log('Ignored');
@@ -100,7 +107,7 @@ const appleCheck = () => {
          (snakePosY + elementSize >= applePosY && snakePosY <= applePosY + elementSize)) {
         randomX();
         randomY();
-        console.log('COLISION X');
+        console.log('COLLISION');
     }
 }
 
