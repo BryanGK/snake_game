@@ -5,8 +5,9 @@ const framesPerSecond = 60;
 const gridSize = 25;
 const elementSize = 25;
 const snakeInitLength = 25;
-
-let snakeBodyLength = 10;
+const mouthSize = 3;
+let gameOver = true;
+let snakeBodyLength = 25;
 let snakeSpeed = 3;
 let snakePosX = 220;
 let snakePosY = 220;
@@ -44,17 +45,15 @@ const drawBody = () => {
 }
 
 const drawHead = () => {
-    ctx.fillStyle = 'rgb(221, 161, 94)';
     getDirection();
+    ctx.fillStyle = 'rgb(221, 161, 94)';
     ctx.fillRect(snakePosX += (snakeSpeed * directionX),
     snakePosY += (snakeSpeed * directionY),
     elementSize,
     elementSize);
-    drawMouth();
 }
 
 const drawMouth = () => {
-    const mouthSize = 5;
     ctx.fillStyle = 'pink'
     if (directionY === -1) {
         ctx.fillRect(snakePosX, snakePosY - mouthSize, elementSize, mouthSize);
@@ -130,10 +129,10 @@ const appleCheck = () => {
 
 const boundaryCheck = () => {
     if (snakePosX <= 0 || snakePosX >= canvas.width - elementSize) {
-        directionX = -directionX;
+        gameOver = true;
     }
     if (snakePosY <= 0 || snakePosY >= canvas.height - elementSize) {
-        directionY = -directionY;
+        gameOver = true;
     }
 }
 
@@ -141,12 +140,34 @@ const bodyCheck = () => {
     snakeBody.forEach((elem) => {
         bodyPosX = elem.bodyPosX;
         bodyPosY = elem.bodyPosY;
-        if ((snakePosX + elementSize >= bodyPosX && snakePosX <= bodyPosX + elementSize) &&
-            (snakePosY + elementSize >= bodyPosY && snakePosY <= bodyPosY + elementSize)) {
-            console.log("Body Collision");
-        };
+        if (directionY === -1) {
+            if ((snakePosX <= bodyPosX + elementSize && snakePosX + elementSize >= bodyPosX) &&
+                (snakePosY - mouthSize <= bodyPosY + elementSize && snakePosY >= bodyPosY + elementSize)) {
+                gameOver = true;
+                }
+        }
+        if (directionY === 1) {
+            if ((snakePosX + elementSize >= bodyPosX && snakePosX <= bodyPosX + elementSize) &&
+                (snakePosY + mouthSize >= bodyPosY && snakePosY <= bodyPosY)) {
+                gameOver = true;
+            }
+        }
+        if (directionX === -1) {
+            if ((snakePosX - mouthSize <= bodyPosX + elementSize && snakePosX >= bodyPosX) &&
+                (snakePosY >= bodyPosY && snakePosY <= bodyPosY + elementSize)) {
+                gameOver = true;
+            }
+        }
+        if (directionX === 1) {
+            if ((snakePosX + mouthSize <= bodyPosX && snakePosX <= bodyPosX + elementSize) &&
+                (snakePosY - elementSize <= bodyPosY && snakePosY >= bodyPosY - elementSize)) {
+                gameOver = true;
+            }
+        }
     });
 }
+
+
 
 const drawGameBoard = () => {
     for (let i = 0; i < canvas.height / gridSize; i++) {
@@ -156,7 +177,7 @@ const drawGameBoard = () => {
                     ctx.fillStyle = 'rgb(96, 108, 56)';
                     ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
                 } else {
-                    ctx.fillStyle = 'rgb(40, 54, 24)';
+                    ctx.fillStyle = 'rgb(60, 74, 24)';
                     ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
                 }
             } else if (i % 2 === 1) {
@@ -164,7 +185,7 @@ const drawGameBoard = () => {
                     ctx.fillStyle = 'rgb(96, 108, 56)';
                     ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
                 } else {
-                    ctx.fillStyle = 'rgb(40, 54, 24)';
+                    ctx.fillStyle = 'rgb(60, 74, 24)';
                     ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
                 }
             }
@@ -172,16 +193,18 @@ const drawGameBoard = () => {
     }
 }
 
-window.onload = function () {
-    setInterval(function () {
-        drawGameBoard();
-        drawBody();
-        drawHead();
-        drawApple();
-        boundaryCheck();
-        appleCheck();
-        // bodyCheck();
-    }, 1000 / framesPerSecond);
-    randomX();
-    randomY();
-}
+window.onload = () => {
+        setInterval(function () {
+            drawGameBoard();
+            drawBody();
+            drawHead();
+            drawMouth();
+            drawApple();
+            boundaryCheck();
+            appleCheck();
+            bodyCheck();
+        }, 1000 / framesPerSecond);
+        randomX();
+        randomY();
+    }
+
