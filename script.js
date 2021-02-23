@@ -3,16 +3,19 @@ const ctx = canvas.getContext('2d');
 
 const framesPerSecond = 60;
 const gridSize = 25;
-let snakeSpeed = 2;
 const elementSize = 25;
 const snakeInitLength = 25;
+
 let snakeBodyLength = 25;
+let snakeSpeed = 3;
 let snakePosX = 295;
 let snakePosY = 245;
 let directionX = 0;
 let directionY = 0;
 let applePosX = 0;
 let applePosY = 0;
+
+let score = 0;
 
 let snakeBody = [];
 
@@ -33,35 +36,11 @@ const buildBody = () => {
 const drawBody = () => {
     buildBody();
     snakeBody.forEach((elem) => {
-        ctx.fillStyle = 'black'
+        ctx.fillStyle = 'yellow'
         ctx.fillRect(elem.bodyPosX, elem.bodyPosY, elem.width, elem.height)
     });
     if (snakeBody.length > snakeBodyLength)
         snakeBody.pop();
-}
-
-const drawGameBoard = () => {
-    for (let i = 0; i < canvas.height / gridSize; i++) {
-        for (let j = 0; j < canvas.width / gridSize; j++) {
-            if (i % 2 === 0) {
-                if (j % 2 === 1) {
-                    ctx.fillStyle = 'rgb(100, 225, 200)';
-                    ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
-                } else {
-                    ctx.fillStyle = 'rgb(100, 255, 200)';
-                    ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
-                }
-            } else if (i % 2 === 1) {
-                if (j % 2 === 0) {
-                    ctx.fillStyle = 'rgb(100, 225, 200)';
-                    ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
-                } else {
-                    ctx.fillStyle = 'rgb(100, 255, 200)';
-                    ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
-                }
-            }
-        }
-    }
 }
 
 const drawHead = () => {
@@ -126,6 +105,7 @@ const appleCheck = () => {
         randomX();
         randomY();
         snakeBodyLength += 5;
+        score++;
         console.log('COLLISION');
     }
 }
@@ -139,6 +119,41 @@ const boundaryCheck = () => {
     }
 }
 
+const bodyCheck = () => {
+    snakeBody.forEach((elem) => {
+        bodyPosX = elem.bodyPosX;
+        bodyPosY = elem.bodyPosY;
+    });
+        if ((snakePosX + elementSize >= bodyPosX && snakePosX <= bodyPosX + elementSize) &&
+            (snakePosY + elementSize >= bodyPosY && snakePosY <= bodyPosY + elementSize)) {
+            console.log("Body Collision");
+        };
+}
+
+const drawGameBoard = () => {
+    for (let i = 0; i < canvas.height / gridSize; i++) {
+        for (let j = 0; j < canvas.width / gridSize; j++) {
+            if (i % 2 === 0) {
+                if (j % 2 === 1) {
+                    ctx.fillStyle = 'rgb(100, 225, 200)';
+                    ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
+                } else {
+                    ctx.fillStyle = 'rgb(100, 255, 200)';
+                    ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
+                }
+            } else if (i % 2 === 1) {
+                if (j % 2 === 0) {
+                    ctx.fillStyle = 'rgb(100, 225, 200)';
+                    ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
+                } else {
+                    ctx.fillStyle = 'rgb(100, 255, 200)';
+                    ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
+                }
+            }
+        }
+    }
+}
+
 window.onload = function () {
     setInterval(function () {
         drawGameBoard();
@@ -147,6 +162,7 @@ window.onload = function () {
         drawApple();
         boundaryCheck();
         appleCheck();
+        // bodyCheck();
     }, 1000 / framesPerSecond);
     randomX();
     randomY();
