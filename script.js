@@ -6,10 +6,10 @@ const gridSize = 25;
 const elementSize = 25;
 const snakeInitLength = 25;
 
-let snakeBodyLength = 25;
+let snakeBodyLength = 10;
 let snakeSpeed = 3;
-let snakePosX = 295;
-let snakePosY = 245;
+let snakePosX = 220;
+let snakePosY = 220;
 let directionX = 0;
 let directionY = 0;
 let applePosX = 0;
@@ -36,7 +36,7 @@ const buildBody = () => {
 const drawBody = () => {
     buildBody();
     snakeBody.forEach((elem) => {
-        ctx.fillStyle = 'yellow'
+        ctx.fillStyle = 'rgb(221, 161, 94)'
         ctx.fillRect(elem.bodyPosX, elem.bodyPosY, elem.width, elem.height)
     });
     if (snakeBody.length > snakeBodyLength)
@@ -44,12 +44,30 @@ const drawBody = () => {
 }
 
 const drawHead = () => {
-    ctx.fillStyle = 'yellow';
+    ctx.fillStyle = 'rgb(221, 161, 94)';
     getDirection();
     ctx.fillRect(snakePosX += (snakeSpeed * directionX),
-        snakePosY += (snakeSpeed * directionY),
-        elementSize,
-        elementSize);
+    snakePosY += (snakeSpeed * directionY),
+    elementSize,
+    elementSize);
+    drawMouth();
+}
+
+const drawMouth = () => {
+    const mouthSize = 5;
+    ctx.fillStyle = 'pink'
+    if (directionY === -1) {
+        ctx.fillRect(snakePosX, snakePosY - mouthSize, elementSize, mouthSize);
+    }
+    if (directionY === 1) {
+        ctx.fillRect(snakePosX, snakePosY + elementSize, elementSize, mouthSize);
+    }
+    if (directionX === -1) {
+        ctx.fillRect(snakePosX - mouthSize, snakePosY, mouthSize, elementSize);
+    }
+    if (directionX === 1 || (directionX === 0 && directionY === 0)) {
+        ctx.fillRect(snakePosX + elementSize, snakePosY, mouthSize, elementSize);
+    }
 }
 
 const drawApple = () => {
@@ -123,11 +141,11 @@ const bodyCheck = () => {
     snakeBody.forEach((elem) => {
         bodyPosX = elem.bodyPosX;
         bodyPosY = elem.bodyPosY;
-    });
         if ((snakePosX + elementSize >= bodyPosX && snakePosX <= bodyPosX + elementSize) &&
             (snakePosY + elementSize >= bodyPosY && snakePosY <= bodyPosY + elementSize)) {
             console.log("Body Collision");
         };
+    });
 }
 
 const drawGameBoard = () => {
@@ -135,18 +153,18 @@ const drawGameBoard = () => {
         for (let j = 0; j < canvas.width / gridSize; j++) {
             if (i % 2 === 0) {
                 if (j % 2 === 1) {
-                    ctx.fillStyle = 'rgb(100, 225, 200)';
+                    ctx.fillStyle = 'rgb(96, 108, 56)';
                     ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
                 } else {
-                    ctx.fillStyle = 'rgb(100, 255, 200)';
+                    ctx.fillStyle = 'rgb(40, 54, 24)';
                     ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
                 }
             } else if (i % 2 === 1) {
                 if (j % 2 === 0) {
-                    ctx.fillStyle = 'rgb(100, 225, 200)';
+                    ctx.fillStyle = 'rgb(96, 108, 56)';
                     ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
                 } else {
-                    ctx.fillStyle = 'rgb(100, 255, 200)';
+                    ctx.fillStyle = 'rgb(40, 54, 24)';
                     ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
                 }
             }
