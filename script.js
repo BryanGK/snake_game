@@ -7,7 +7,7 @@ const elementSize = 20;
 const snakeInitLength = 20;
 const mouthSize = 3;
 
-let snakeBodyLength = 4;
+let snakeBodyLength = 15;
 let snakeSpeed = 20;
 let snakePosX = 200;
 let snakePosY = 200;
@@ -118,22 +118,6 @@ const getDirection = () => {
     });
 }
 
-const drawMouth = () => {
-    ctx.fillStyle = 'pink'
-    if (directionY === -1) {
-        ctx.fillRect(snakePosX, snakePosY - mouthSize, elementSize, mouthSize);
-    }
-    if (directionY === 1) {
-        ctx.fillRect(snakePosX, snakePosY + elementSize, elementSize, mouthSize);
-    }
-    if (directionX === -1) {
-        ctx.fillRect(snakePosX - mouthSize, snakePosY, mouthSize, elementSize);
-    }
-    if (directionX === 1 || (directionX === 0 && directionY === 0)) {
-        ctx.fillRect(snakePosX + elementSize, snakePosY, mouthSize, elementSize);
-    }
-}
-
 const drawApple = () => {
     ctx.fillStyle = 'red'
     ctx.fillRect(applePosX, applePosY, elementSize, elementSize)
@@ -154,26 +138,22 @@ const randomY = () => {
 }
 
 const boundaryCheck = () => {
-    if (snakePosX < 0 || snakePosX >= canvas.width - elementSize) {
+    if (snakePosX < 0 || snakePosX === canvas.width) {
         gameOver = true;
         snakeSpeed = -snakeSpeed;
     }
-    if (snakePosY < 0 || snakePosY >= canvas.height - elementSize) {
+    if (snakePosY < 0 || snakePosY === canvas.height) {
         gameOver = true;
         snakeSpeed = -snakeSpeed;
     }
 }
 
 const appleCheck = () => {
-    if ((snakePosX + elementSize > applePosX &&
-        snakePosX < applePosX + elementSize) &&
-        (snakePosY + elementSize > applePosY &&
-            snakePosY < applePosY + elementSize)) {
+    if (snakePosX  === applePosX && snakePosY === applePosY) {
         randomX();
         randomY();
         snakeBodyLength += 1;
         score++;
-        console.log('COLLISION');
     }
 }
 
@@ -181,57 +161,44 @@ const bodyCheck = () => {
     snakeBody.forEach((elem) => {
         bodyPosX = elem.bodyPosX;
         bodyPosY = elem.bodyPosY;
-        if (directionY === -1) {
-            if ((snakePosX <= bodyPosX + elementSize &&
-                snakePosX + elementSize >= bodyPosX) &&
-                (snakePosY - mouthSize <= bodyPosY + elementSize &&
-                snakePosY >= bodyPosY + elementSize)) {
-                gameOver = true;
-                console.log('up')
-            }
-        }
-        if (directionY === 1) {
-            if ((snakePosX + elementSize >= bodyPosX &&
-                snakePosX <= bodyPosX + elementSize) &&
-                (snakePosY + mouthSize >= bodyPosY &&
-                    snakePosY <= bodyPosY)) {
-                gameOver = true;
-                console.log('dn')
-            }
-        }
-        if (directionX === -1) {
-            if ((snakePosX - mouthSize <= bodyPosX + elementSize &&
-                snakePosX >= bodyPosX) &&
-                (snakePosY >= bodyPosY &&
-                    snakePosY <= bodyPosY + elementSize)) {
-                gameOver = true;
-                console.log('left')
-            }
-        }
-        if (directionX === 1) {
-            if ((snakePosX + mouthSize <= bodyPosX &&
-                snakePosX <= bodyPosX + elementSize) &&
-                (snakePosY - elementSize <= bodyPosY &&
-                    snakePosY >= bodyPosY - elementSize)) {
-                gameOver = true;
-                console.log('right')
-            }
+        if (directionX === 0 && directionY === 0) {
+            return;
+        } else if (snakePosY === bodyPosY && snakePosX === bodyPosX) {
+            gameOver = true;
         }
     });
 }
 
-window.onload = () => {
+const checkGameOver = () => {
+    if (gameOver === true) {
+        document.location.reload();
+        alert("Game Over")
+    }
+}
+
+const playGame = () => {
     setInterval(function () {
         drawGameBoard();
         drawBody();
         drawHead();
-        drawMouth();
         drawApple();
         boundaryCheck();
         appleCheck();
         bodyCheck();
+        checkGameOver();
     }, 1000 / framesPerSecond);
     randomX();
     randomY();
 }
+
+window.onload = () => {
+    drawGameBoard();
+    window.addEventListener('keydown', (e) => {
+        if ((e.code) === "Space") {
+            gameOver = false;
+            playGame();
+        }
+    });
+}
+
 
