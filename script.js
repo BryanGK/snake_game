@@ -1,31 +1,47 @@
 const canvas = document.querySelector('#game-board');
 const ctx = canvas.getContext('2d');
 
-const framesPerSecond = 60;
-const gridSize = 25;
-const elementSize = 25;
-const snakeInitLength = 25;
+const framesPerSecond = 10;
+const gridSize = 20;
+const elementSize = 20;
+const snakeInitLength = 20;
 const mouthSize = 3;
-let gameOver = true;
-let snakeBodyLength = 25;
-let snakeSpeed = 3;
-let snakePosX = 220;
-let snakePosY = 220;
+
+let snakeBodyLength = 4;
+let snakeSpeed = 20;
+let snakePosX = 200;
+let snakePosY = 200;
 let directionX = 0;
 let directionY = 0;
 let applePosX = 0;
 let applePosY = 0;
 
+let gameOver = true;
 let score = 0;
 
 let snakeBody = [];
 
-class SnakeBodySegment {
-    constructor(bodyPosX, bodyPosY, elementSize) {
-        this.bodyPosX = bodyPosX;
-        this.bodyPosY = bodyPosY;
-        this.width = elementSize;
-        this.height = elementSize;
+const drawGameBoard = () => {
+    for (let i = 0; i < canvas.height / gridSize; i++) {
+        for (let j = 0; j < canvas.width / gridSize; j++) {
+            if (i % 2 === 0) {
+                if (j % 2 === 1) {
+                    ctx.fillStyle = 'rgb(96, 108, 56)';
+                    ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
+                } else {
+                    ctx.fillStyle = 'rgb(60, 98, 56)';
+                    ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
+                }
+            } else if (i % 2 === 1) {
+                if (j % 2 === 0) {
+                    ctx.fillStyle = 'rgb(96, 108, 56)';
+                    ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
+                } else {
+                    ctx.fillStyle = 'rgb(60, 98, 56)';
+                    ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
+                }
+            }
+        }
     }
 }
 
@@ -44,13 +60,62 @@ const drawBody = () => {
         snakeBody.pop();
 }
 
+class SnakeBodySegment {
+    constructor(bodyPosX, bodyPosY, elementSize) {
+        this.bodyPosX = bodyPosX;
+        this.bodyPosY = bodyPosY;
+        this.width = elementSize;
+        this.height = elementSize;
+    }
+}
+
 const drawHead = () => {
-    getDirection();
+    checkGridPos();
     ctx.fillStyle = 'rgb(221, 161, 94)';
     ctx.fillRect(snakePosX += (snakeSpeed * directionX),
-    snakePosY += (snakeSpeed * directionY),
-    elementSize,
-    elementSize);
+        snakePosY += (snakeSpeed * directionY),
+        elementSize,
+        elementSize);
+}
+
+const checkGridPos = () => {
+    if (snakePosX % gridSize === 0 && snakePosY % gridSize === 0) {
+        getDirection();
+    }
+}
+
+const getDirection = () => {
+    window.addEventListener('keydown', (e) => {
+        switch (e.code) {
+            case 'ArrowUp':
+                directionX = 0;
+                if (directionY === 1) {
+                    return;
+                } else directionY = -1;
+                break;
+            case 'ArrowDown':
+                directionX = 0;
+                if (directionY === -1) {
+                    return;
+                } else directionY = 1;
+                break;
+            case 'ArrowLeft':
+                directionY = 0;
+                if (directionX === 1) {
+                    return;
+                } else directionX = -1;
+                break;
+            case 'ArrowRight':
+                directionY = 0;
+                if (directionX === -1) {
+                    return;
+                } else directionX = 1;
+                break;
+            default:
+                console.log('Ignored');
+                break;
+        }
+    });
 }
 
 const drawMouth = () => {
@@ -75,64 +140,40 @@ const drawApple = () => {
 }
 
 const randomX = () => {
-    return applePosX = Math.floor(Math.random() * (canvas.width - elementSize)) + 1;
+    applePosX = Math.floor(Math.random() * (canvas.width / gridSize)) * (gridSize);
+    if (applePosX < gridSize || applePosX === (canvas.width - gridSize)) {
+        randomX();
+    }
 }
 
 const randomY = () => {
-    return applePosY = Math.floor(Math.random() * (canvas.height - elementSize)) + 1;
-}
-
-function getDirection() {
-    window.addEventListener('keydown', (e) => {
-        switch (e.code) {
-            case 'ArrowUp':
-                directionX = 0;
-                if (directionY === 1) {
-                    return;
-                } else directionY = -1;
-                break;
-            case 'ArrowDown':
-                directionX = 0;
-                if (directionY === -1) {
-                    return;
-                } else directionY = 1;
-                break;
-            case 'ArrowLeft':
-                directionY = 0;
-                if (directionX === 1) {
-                    return;
-                } else  directionX = -1;
-                break;
-            case 'ArrowRight':
-                directionY = 0;
-                if (directionX === -1) {
-                    return;
-                } else directionX = 1;
-                break;
-            default:
-                console.log('Ignored');
-                break;
-        }
-    });
-}
-
-const appleCheck = () => {
-    if ((snakePosX + elementSize >= applePosX && snakePosX <= applePosX + elementSize) &&
-         (snakePosY + elementSize >= applePosY && snakePosY <= applePosY + elementSize)) {
-        randomX();
+    applePosY = Math.floor(Math.random() * (canvas.height / gridSize)) * (gridSize);
+    if (applePosY < gridSize || applePosY === (canvas.height - gridSize)) {
         randomY();
-        snakeBodyLength += 5;
-        score++;
-        console.log('COLLISION');
     }
 }
 
 const boundaryCheck = () => {
-    if (snakePosX <= 0 || snakePosX >= canvas.width - elementSize) {
+    if (snakePosX < 0 || snakePosX >= canvas.width - elementSize) {
         gameOver = true;
+        snakeSpeed = -snakeSpeed;
     }
-    if (snakePosY <= 0 || snakePosY >= canvas.height - elementSize) {
+    if (snakePosY < 0 || snakePosY >= canvas.height - elementSize) {
         gameOver = true;
+        snakeSpeed = -snakeSpeed;
+    }
+}
+
+const appleCheck = () => {
+    if ((snakePosX + elementSize > applePosX &&
+        snakePosX < applePosX + elementSize) &&
+        (snakePosY + elementSize > applePosY &&
+            snakePosY < applePosY + elementSize)) {
+        randomX();
+        randomY();
+        snakeBodyLength += 1;
+        score++;
+        console.log('COLLISION');
     }
 }
 
@@ -141,70 +182,56 @@ const bodyCheck = () => {
         bodyPosX = elem.bodyPosX;
         bodyPosY = elem.bodyPosY;
         if (directionY === -1) {
-            if ((snakePosX <= bodyPosX + elementSize && snakePosX + elementSize >= bodyPosX) &&
-                (snakePosY - mouthSize <= bodyPosY + elementSize && snakePosY >= bodyPosY + elementSize)) {
+            if ((snakePosX <= bodyPosX + elementSize &&
+                snakePosX + elementSize >= bodyPosX) &&
+                (snakePosY - mouthSize <= bodyPosY + elementSize &&
+                snakePosY >= bodyPosY + elementSize)) {
                 gameOver = true;
-                }
+                console.log('up')
+            }
         }
         if (directionY === 1) {
-            if ((snakePosX + elementSize >= bodyPosX && snakePosX <= bodyPosX + elementSize) &&
-                (snakePosY + mouthSize >= bodyPosY && snakePosY <= bodyPosY)) {
+            if ((snakePosX + elementSize >= bodyPosX &&
+                snakePosX <= bodyPosX + elementSize) &&
+                (snakePosY + mouthSize >= bodyPosY &&
+                    snakePosY <= bodyPosY)) {
                 gameOver = true;
+                console.log('dn')
             }
         }
         if (directionX === -1) {
-            if ((snakePosX - mouthSize <= bodyPosX + elementSize && snakePosX >= bodyPosX) &&
-                (snakePosY >= bodyPosY && snakePosY <= bodyPosY + elementSize)) {
+            if ((snakePosX - mouthSize <= bodyPosX + elementSize &&
+                snakePosX >= bodyPosX) &&
+                (snakePosY >= bodyPosY &&
+                    snakePosY <= bodyPosY + elementSize)) {
                 gameOver = true;
+                console.log('left')
             }
         }
         if (directionX === 1) {
-            if ((snakePosX + mouthSize <= bodyPosX && snakePosX <= bodyPosX + elementSize) &&
-                (snakePosY - elementSize <= bodyPosY && snakePosY >= bodyPosY - elementSize)) {
+            if ((snakePosX + mouthSize <= bodyPosX &&
+                snakePosX <= bodyPosX + elementSize) &&
+                (snakePosY - elementSize <= bodyPosY &&
+                    snakePosY >= bodyPosY - elementSize)) {
                 gameOver = true;
+                console.log('right')
             }
         }
     });
 }
 
-
-
-const drawGameBoard = () => {
-    for (let i = 0; i < canvas.height / gridSize; i++) {
-        for (let j = 0; j < canvas.width / gridSize; j++) {
-            if (i % 2 === 0) {
-                if (j % 2 === 1) {
-                    ctx.fillStyle = 'rgb(96, 108, 56)';
-                    ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
-                } else {
-                    ctx.fillStyle = 'rgb(60, 74, 24)';
-                    ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
-                }
-            } else if (i % 2 === 1) {
-                if (j % 2 === 0) {
-                    ctx.fillStyle = 'rgb(96, 108, 56)';
-                    ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
-                } else {
-                    ctx.fillStyle = 'rgb(60, 74, 24)';
-                    ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
-                }
-            }
-        }
-    }
-}
-
 window.onload = () => {
-        setInterval(function () {
-            drawGameBoard();
-            drawBody();
-            drawHead();
-            drawMouth();
-            drawApple();
-            boundaryCheck();
-            appleCheck();
-            bodyCheck();
-        }, 1000 / framesPerSecond);
-        randomX();
-        randomY();
-    }
+    setInterval(function () {
+        drawGameBoard();
+        drawBody();
+        drawHead();
+        drawMouth();
+        drawApple();
+        boundaryCheck();
+        appleCheck();
+        bodyCheck();
+    }, 1000 / framesPerSecond);
+    randomX();
+    randomY();
+}
 
