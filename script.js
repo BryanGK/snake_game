@@ -1,5 +1,6 @@
 const canvas = document.querySelector('#game-board');
 const ctx = canvas.getContext('2d');
+const scoreBoard = document.querySelector('#score p');
 
 const framesPerSecond = 10;
 const gridSize = 20;
@@ -7,7 +8,7 @@ const elementSize = 20;
 const snakeInitLength = 20;
 const mouthSize = 3;
 
-let snakeBodyLength = 15;
+let snakeBodyLength = 5;
 let snakeSpeed = 20;
 let snakePosX = 200;
 let snakePosY = 200;
@@ -17,6 +18,7 @@ let applePosX = 0;
 let applePosY = 0;
 
 let gameOver = true;
+
 let score = 0;
 
 let snakeBody = [];
@@ -45,6 +47,26 @@ const drawGameBoard = () => {
     }
 }
 
+const drawGameOver = () => {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = 'rgb(255, 255, 255)'
+    ctx.lineWidth = 10;
+    ctx.strokeRect(gridSize, gridSize, canvas.width - (gridSize * 2), canvas.height - (gridSize * 2));
+    ctx.fillStyle = 'rgb(255, 255, 255)'
+    ctx.font = '100px VT323';
+    ctx.fillText('Game Over', 117, canvas.height * .3);
+    ctx.font = '36px VT323';
+    ctx.fillText('Press Spacebar to start a New Game', 55, canvas.height * .45);
+    ctx.font = '24px VT323';
+    ctx.fillText('* Use Arrow keys to control Snake *', 132, canvas.height * .63);
+    ctx.fillText('* Collect Apples to score points *', 137, canvas.height * .7);
+    ctx.fillStyle = 'red';
+    ctx.font = '18px VT323';
+    ctx.fillText('<-- Avoid hitting the edges or your own tail! -->', 124, canvas.height * .8)
+
+}
+
 const buildBody = () => {
     const snakeSegment = new SnakeBodySegment(snakePosX, snakePosY, elementSize)
     return snakeBody.unshift(snakeSegment);
@@ -53,8 +75,11 @@ const buildBody = () => {
 const drawBody = () => {
     buildBody();
     snakeBody.forEach((elem) => {
-        ctx.fillStyle = 'rgb(221, 161, 94)'
-        ctx.fillRect(elem.bodyPosX, elem.bodyPosY, elem.width, elem.height)
+        ctx.fillStyle = 'rgb(221, 161, 94)';
+        ctx.fillRect(elem.bodyPosX, elem.bodyPosY, elem.width, elem.height);
+        ctx.strokeStyle = 'rgb(241, 201, 114)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(elem.bodyPosX, elem.bodyPosY, elem.width, elem.height);
     });
     if (snakeBody.length > snakeBodyLength)
         snakeBody.pop();
@@ -76,6 +101,9 @@ const drawHead = () => {
         snakePosY += (snakeSpeed * directionY),
         elementSize,
         elementSize);
+    ctx.strokeStyle = 'rgb(241, 201, 114)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(snakePosX, snakePosY, elementSize, elementSize);
 }
 
 const checkGridPos = () => {
@@ -149,7 +177,7 @@ const boundaryCheck = () => {
 }
 
 const appleCheck = () => {
-    if (snakePosX  === applePosX && snakePosY === applePosY) {
+    if (snakePosX === applePosX && snakePosY === applePosY) {
         randomX();
         randomY();
         snakeBodyLength += 1;
@@ -170,35 +198,54 @@ const bodyCheck = () => {
 }
 
 const checkGameOver = () => {
-    if (gameOver === true) {
+    if (gameOver) {
+        localStorage.setItem('lastRoundScore', score);
         document.location.reload();
-        alert("Game Over")
     }
 }
 
 const playGame = () => {
     setInterval(function () {
         drawGameBoard();
+        drawApple();
         drawBody();
         drawHead();
-        drawApple();
         boundaryCheck();
         appleCheck();
         bodyCheck();
         checkGameOver();
+        addScore();
     }, 1000 / framesPerSecond);
     randomX();
     randomY();
 }
 
-window.onload = () => {
-    drawGameBoard();
-    window.addEventListener('keydown', (e) => {
+const addScore = () => {
+    localStorage.setItem('Score', score);
+    const savedScore = localStorage.getItem('Score');
+    scoreBoard.textContent = `SCORE: ${savedScore}`;
+}
+
+const displayLastRoundScore = () => {
+    const savedScore = localStorage.getItem('lastRoundScore');
+    scoreBoard.textContent = `SCORE: ${savedScore}`;
+}
+
+window.addEventListener('keydown', (e) => {
+    if (gameOver) {
         if ((e.code) === "Space") {
             gameOver = false;
             playGame();
+            score = 0;
         }
-    });
+    }
+});
+
+window.onload = () => {
+    drawGameBoard();
+    drawGameOver();
+    displayLastRoundScore();
 }
+
 
 
