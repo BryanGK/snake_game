@@ -1,6 +1,8 @@
 const canvas = document.querySelector('#game-board');
 const ctx = canvas.getContext('2d');
 const scoreBoard = document.querySelector('#score span');
+const highScore = document.querySelector('#high-score span');
+const savedScore = JSON.parse(localStorage.getItem('scoreLocalStorage'));
 
 const framesPerSecond = 10;
 const gridSize = 20;
@@ -18,7 +20,12 @@ let applePosY = 0;
 
 let gameOver = true;
 
-let score = 0;
+let score = 0
+
+let scoreLocalStorage = {
+    lastRoundScore: 0,
+    highScore: 0,
+};
 
 let snakeBody = [];
 
@@ -32,7 +39,7 @@ const drawGameBoard = () => {
                 } else {
                     ctx.fillStyle = 'rgb(60, 100, 56)';
                     ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
-                } // this can be fixed up here
+                }
             } else if (i % 2 === 1) {
                 if (j % 2 === 0) {
                     ctx.fillStyle = 'rgb(96, 108, 56)';
@@ -61,8 +68,8 @@ const drawGameOver = () => {
     ctx.fillText('* Use Arrow keys to control Snake *', 132, canvas.height * .63);
     ctx.fillText('* Collect Apples to score points *', 137, canvas.height * .7);
     ctx.fillStyle = 'red';
-    ctx.font = '18px VT323';
-    ctx.fillText('<-- Avoid hitting the edges or your own tail! -->', 124, canvas.height * .8)
+    ctx.font = '24px VT323';
+    ctx.fillText('<-- Avoid hitting the edges or your own tail! -->', 65, canvas.height * .8)
 }
 
 const buildBody = () => {
@@ -189,6 +196,7 @@ const appleCheck = () => {
         randomY();
         snakeBodyLength += 1;
         score++;
+        scoreBoard.textContent = `SCORE: ${score}`;
     }
 }
 
@@ -204,47 +212,41 @@ const bodyCheck = () => {
     });
 }
 
-const checkGameOver = () => {
-    if (gameOver) {
-        if (localStorage.getItem('highScore') === null) {
-            localStorage.setItem('highScore', 0);
-        }
-        const highScore = JSON.parse(localStorage.getItem('highScore'));
-        const score = JSON.parse(localStorage.getItem('score'));
-        if (score > highScore) {
-            localStorage.setItem('highScore', score);
-        }
-        localStorage.setItem('lastRoundScore', score);
+
+
+const createLocalStorage = () => {
+    if (savedScore === null) {
+        localStorage.setItem('scoreLocalStorage', JSON.stringify(scoreLocalStorage));
         document.location.reload();
     }
 }
 
-const addScore = () => {
-    localStorage.setItem('score', score);
-    const savedScore = localStorage.getItem('score');
-    scoreBoard.textContent = `SCORE: ${savedScore}`;
+const displayLastRoundScore = () => {
+    scoreBoard.textContent = `SCORE: ${savedScore.lastRoundScore}`;
+    highScore.textContent = `HIGH SCORE: ${savedScore.highScore}`;
 }
 
-const displayLastRoundScore = () => {
-    const savedScore = localStorage.getItem('lastRoundScore');
-    savedScore === null
-        ? scoreBoard.textContent = `SCORE: 0`
-        : scoreBoard.textContent = `SCORE: ${savedScore}`;
-    const highScore = localStorage.getItem('highScore');
-    highScore === null
-        ? document.querySelector('#high-score span').textContent = `HIGH SCORE: 0`
-        : document.querySelector('#high-score span').textContent = `HIGH SCORE: ${highScore}`;
+const checkGameOver = () => {
+    if (gameOver) {
+        scoreLocalStorage.lastRoundScore = score;
+        scoreLocalStorage.highScore = savedScore.highScore;
+        if (scoreLocalStorage.lastRoundScore > scoreLocalStorage.highScore) {
+            scoreLocalStorage.highScore = scoreLocalStorage.lastRoundScore;
+            localStorage.setItem('scoreLocalStorage', JSON.stringify(scoreLocalStorage));
+        }
+        localStorage.setItem('scoreLocalStorage', JSON.stringify(scoreLocalStorage));
+        document.location.reload();
+    }
 }
 
 window.addEventListener('keydown', (e) => {
-    if (gameOver) {
-        if ((e.code) === "Space") { // could be fixed up
-            gameOver = false;
-            playGame();
-            score = 0;
-        }
+    if (gameOver && (e.code) === "Space") {
+        gameOver = false;
+        playGame();
+        score = 0;
     }
 });
+
 
 const playGame = () => {
     setInterval(function () {
@@ -256,19 +258,15 @@ const playGame = () => {
         appleCheck();
         bodyCheck();
         checkGameOver();
-        addScore();
     }, 1000 / framesPerSecond);
     randomX();
     randomY();
 }
 
 window.onload = () => {
+    createLocalStorage();
     drawGameBoard();
     drawGameOver();
     displayLastRoundScore();
 }
-
-
-
-
 
