@@ -1,6 +1,6 @@
 # The Snake Game
 
-### A created with HTML, CSS, Javascript.
+### A Snake Game created with HTML, CSS, Javascript.
 
 ### See it [here](https://bryangk.github.io/snake_game/)
 
