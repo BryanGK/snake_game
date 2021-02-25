@@ -1,6 +1,6 @@
 const canvas = document.querySelector('#game-board');
 const ctx = canvas.getContext('2d');
-const scoreBoard = document.querySelector('#score p');
+const scoreBoard = document.querySelector('#score span');
 
 const framesPerSecond = 10;
 const gridSize = 20;
@@ -31,7 +31,7 @@ const drawGameBoard = () => {
                     ctx.fillStyle = 'rgb(96, 108, 56)';
                     ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
                 } else {
-                    ctx.fillStyle = 'rgb(60, 98, 56)';
+                    ctx.fillStyle = 'rgb(60, 100, 56)';
                     ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
                 }
             } else if (i % 2 === 1) {
@@ -39,7 +39,7 @@ const drawGameBoard = () => {
                     ctx.fillStyle = 'rgb(96, 108, 56)';
                     ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
                 } else {
-                    ctx.fillStyle = 'rgb(60, 98, 56)';
+                    ctx.fillStyle = 'rgb(60, 100, 56)';
                     ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
                 }
             }
@@ -50,10 +50,10 @@ const drawGameBoard = () => {
 const drawGameOver = () => {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = 'rgb(255, 255, 255)'
+    ctx.strokeStyle = 'rgb(230, 230, 230)'
     ctx.lineWidth = 10;
     ctx.strokeRect(gridSize, gridSize, canvas.width - (gridSize * 2), canvas.height - (gridSize * 2));
-    ctx.fillStyle = 'rgb(255, 255, 255)'
+    ctx.fillStyle = 'rgb(230, 230, 230)'
     ctx.font = '100px VT323';
     ctx.fillText('Game Over', 117, canvas.height * .3);
     ctx.font = '36px VT323';
@@ -64,7 +64,6 @@ const drawGameOver = () => {
     ctx.fillStyle = 'red';
     ctx.font = '18px VT323';
     ctx.fillText('<-- Avoid hitting the edges or your own tail! -->', 124, canvas.height * .8)
-
 }
 
 const buildBody = () => {
@@ -95,7 +94,9 @@ class SnakeBodySegment {
 }
 
 const drawHead = () => {
-    checkGridPos();
+    if (snakePosX % gridSize === 0 && snakePosY % gridSize === 0) {
+        getDirection();
+    }
     ctx.fillStyle = 'rgb(221, 161, 94)';
     ctx.fillRect(snakePosX += (snakeSpeed * directionX),
         snakePosY += (snakeSpeed * directionY),
@@ -104,12 +105,6 @@ const drawHead = () => {
     ctx.strokeStyle = 'rgb(241, 201, 114)';
     ctx.lineWidth = 1;
     ctx.strokeRect(snakePosX, snakePosY, elementSize, elementSize);
-}
-
-const checkGridPos = () => {
-    if (snakePosX % gridSize === 0 && snakePosY % gridSize === 0) {
-        getDirection();
-    }
 }
 
 const getDirection = () => {
@@ -147,8 +142,21 @@ const getDirection = () => {
 }
 
 const drawApple = () => {
-    ctx.fillStyle = 'red'
-    ctx.fillRect(applePosX, applePosY, elementSize, elementSize)
+    snakeBody.forEach((elem) => {
+        bodyPosX = elem.bodyPosX;
+        bodyPosY = elem.bodyPosY;
+        if (applePosX === bodyPosX && applePosY === bodyPosY) {
+            randomX();
+            randomY();
+        } else {
+            ctx.fillStyle = 'red'
+            ctx.strokeStyle = 'red';
+            ctx.beginPath();
+            ctx.arc(applePosX + (elementSize / 2), applePosY + (elementSize / 2), elementSize / 2, 0, 2 * Math.PI, true);
+            ctx.stroke();
+            ctx.fill();
+        }
+    });
 }
 
 const randomX = () => {
@@ -199,10 +207,45 @@ const bodyCheck = () => {
 
 const checkGameOver = () => {
     if (gameOver) {
+        if (localStorage.getItem('highScore') === null) {
+            localStorage.setItem('highScore', 0);
+        }
+        const highScore = JSON.parse(localStorage.getItem('highScore'));
+        const score = JSON.parse(localStorage.getItem('score'));
+        if (score > highScore) {
+            localStorage.setItem('highScore', score);
+        }
         localStorage.setItem('lastRoundScore', score);
         document.location.reload();
     }
 }
+
+const addScore = () => {
+    localStorage.setItem('score', score);
+    const savedScore = localStorage.getItem('score');
+    scoreBoard.textContent = `SCORE: ${savedScore}`;
+}
+
+const displayLastRoundScore = () => {
+    const savedScore = localStorage.getItem('lastRoundScore');
+    savedScore === null
+        ? scoreBoard.textContent = `SCORE: 0`
+        : scoreBoard.textContent = `SCORE: ${savedScore}`;
+    const highScore = localStorage.getItem('highScore');
+    highScore === null
+        ? document.querySelector('#high-score span').textContent = `HIGH SCORE: 0`
+        : document.querySelector('#high-score span').textContent = `HIGH SCORE: ${highScore}`;
+}
+
+window.addEventListener('keydown', (e) => {
+    if (gameOver) {
+        if ((e.code) === "Space") {
+            gameOver = false;
+            playGame();
+            score = 0;
+        }
+    }
+});
 
 const playGame = () => {
     setInterval(function () {
@@ -220,32 +263,13 @@ const playGame = () => {
     randomY();
 }
 
-const addScore = () => {
-    localStorage.setItem('Score', score);
-    const savedScore = localStorage.getItem('Score');
-    scoreBoard.textContent = `SCORE: ${savedScore}`;
-}
-
-const displayLastRoundScore = () => {
-    const savedScore = localStorage.getItem('lastRoundScore');
-    scoreBoard.textContent = `SCORE: ${savedScore}`;
-}
-
-window.addEventListener('keydown', (e) => {
-    if (gameOver) {
-        if ((e.code) === "Space") {
-            gameOver = false;
-            playGame();
-            score = 0;
-        }
-    }
-});
-
 window.onload = () => {
     drawGameBoard();
     drawGameOver();
     displayLastRoundScore();
 }
+
+
 
 
 
