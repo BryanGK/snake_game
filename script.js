@@ -6,7 +6,6 @@ const framesPerSecond = 10;
 const gridSize = 20;
 const elementSize = 20;
 const snakeInitLength = 20;
-const mouthSize = 3;
 
 let snakeBodyLength = 5;
 let snakeSpeed = 20;
@@ -33,7 +32,7 @@ const drawGameBoard = () => {
                 } else {
                     ctx.fillStyle = 'rgb(60, 100, 56)';
                     ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
-                }
+                } // this can be fixed up here
             } else if (i % 2 === 1) {
                 if (j % 2 === 0) {
                     ctx.fillStyle = 'rgb(96, 108, 56)';
@@ -239,7 +238,7 @@ const displayLastRoundScore = () => {
 
 window.addEventListener('keydown', (e) => {
     if (gameOver) {
-        if ((e.code) === "Space") {
+        if ((e.code) === "Space") { // could be fixed up
             gameOver = false;
             playGame();
             score = 0;
