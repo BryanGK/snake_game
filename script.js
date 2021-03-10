@@ -103,7 +103,7 @@ const drawBody = () => {
 
 const drawHead = () => {
     if (snakePosX % GRID_SIZE === 0 && snakePosY % GRID_SIZE === 0) {
-        getDirection();
+        moveSnake();
     }
     ctx.fillStyle = 'rgb(221, 161, 94)';
     ctx.fillRect(snakePosX += (snake.speed * snake.directionX),
@@ -115,7 +115,7 @@ const drawHead = () => {
     ctx.strokeRect(snakePosX, snakePosY, GRID_SIZE, GRID_SIZE);
 }
 
-const getDirection = () => {
+const moveSnake = () => {
     window.addEventListener('keydown', (e) => {
         switch (e.code) {
             case 'ArrowUp':
@@ -142,6 +142,12 @@ const getDirection = () => {
                     return;
                 } else snake.directionX = 1;
                 break;
+            case 'Space':
+                if (gameOver) {
+                    gameOver = false;
+                    playGame();
+                    score = 0;
+                }
             default:
                 console.log('Ignored');
                 break;
@@ -175,18 +181,16 @@ const getRandomApplePos = () => {
 const boundaryCheck = () => {
     if (snakePosX < 0 || snakePosX === canvas.width) {
         gameOver = true;
-        snake.speed = -snake.speed;
     }
     if (snakePosY < 0 || snakePosY === canvas.height) {
         gameOver = true;
-        snake.speed = -snake.speed;
     }
 }
 
 const appleCheck = () => {
     if (snakePosX === apple.x && snakePosY === apple.y) {
         getRandomApplePos();
-        snake.length += 1;
+        snake.length++;
         score++;
         scoreBoard.textContent = `SCORE: ${score}`;
     }
@@ -227,15 +231,6 @@ const checkGameOver = () => {
     }
 }
 
-window.addEventListener('keydown', (e) => {
-    if (gameOver && (e.code) === "Space") {
-        gameOver = false;
-        playGame();
-        score = 0;
-    }
-});
-
-
 const playGame = () => {
     setInterval(function () {
         drawGameBoard();
@@ -255,5 +250,6 @@ window.onload = () => {
     drawGameBoard();
     drawGameOver();
     displayLastRoundScore();
+    moveSnake();
 }
 
