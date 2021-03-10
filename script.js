@@ -4,22 +4,12 @@ const scoreBoard = document.querySelector('#score span');
 const highScore = document.querySelector('#high-score span');
 const savedScore = JSON.parse(localStorage.getItem('scoreLocalStorage'));
 
-const framesPerSecond = 10;
-const gridSize = 20;
-const elementSize = 20;
-const snakeInitLength = 20;
+const FRAMES_PER_SECOND = 10;
+const GRID_SIZE = 20;
 
-let snakeBodyLength = 5;
-let snakeSpeed = 20;
 let snakePosX = 200;
 let snakePosY = 200;
-let directionX = 0;
-let directionY = 0;
-let applePosX = 0;
-let applePosY = 0;
-
 let gameOver = true;
-
 let score = 0
 
 let scoreLocalStorage = {
@@ -27,26 +17,47 @@ let scoreLocalStorage = {
     highScore: 0,
 };
 
+let apple = {
+    x: 0,
+    y: 0
+}
+
+class SnakeBodySegment {
+    constructor(bodyPosX, bodyPosY, GRID_SIZE) {
+        this.bodyPosX = bodyPosX;
+        this.bodyPosY = bodyPosY;
+        this.width = GRID_SIZE;
+        this.height = GRID_SIZE;
+    }
+}
+
 let snakeBody = [];
 
+let snake = {
+    directionX: 0,
+    directionY: 0,
+    speed: 20,
+    length: 5
+}
+
 const drawGameBoard = () => {
-    for (let i = 0; i < canvas.height / gridSize; i++) {
-        for (let j = 0; j < canvas.width / gridSize; j++) {
+    for (let i = 0; i < canvas.height / GRID_SIZE; i++) {
+        for (let j = 0; j < canvas.width / GRID_SIZE; j++) {
             if (i % 2 === 0) {
                 if (j % 2 === 1) {
                     ctx.fillStyle = 'rgb(96, 108, 56)';
-                    ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
+                    ctx.fillRect(GRID_SIZE * j, GRID_SIZE * i, GRID_SIZE, GRID_SIZE);
                 } else {
                     ctx.fillStyle = 'rgb(60, 100, 56)';
-                    ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
+                    ctx.fillRect(GRID_SIZE * j, GRID_SIZE * i, GRID_SIZE, GRID_SIZE);
                 }
             } else if (i % 2 === 1) {
                 if (j % 2 === 0) {
                     ctx.fillStyle = 'rgb(96, 108, 56)';
-                    ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
+                    ctx.fillRect(GRID_SIZE * j, GRID_SIZE * i, GRID_SIZE, GRID_SIZE);
                 } else {
                     ctx.fillStyle = 'rgb(60, 100, 56)';
-                    ctx.fillRect(gridSize * j, gridSize * i, gridSize, gridSize);
+                    ctx.fillRect(GRID_SIZE * j, GRID_SIZE * i, GRID_SIZE, GRID_SIZE);
                 }
             }
         }
@@ -58,7 +69,7 @@ const drawGameOver = () => {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = 'rgb(230, 230, 230)'
     ctx.lineWidth = 10;
-    ctx.strokeRect(gridSize, gridSize, canvas.width - (gridSize * 2), canvas.height - (gridSize * 2));
+    ctx.strokeRect(GRID_SIZE, GRID_SIZE, canvas.width - (GRID_SIZE * 2), canvas.height - (GRID_SIZE * 2));
     ctx.fillStyle = 'rgb(230, 230, 230)'
     ctx.font = '100px VT323';
     ctx.fillText('Game Over', 117, canvas.height * .3);
@@ -73,7 +84,7 @@ const drawGameOver = () => {
 }
 
 const buildBody = () => {
-    const snakeSegment = new SnakeBodySegment(snakePosX, snakePosY, elementSize)
+    const snakeSegment = new SnakeBodySegment(snakePosX, snakePosY, GRID_SIZE)
     return snakeBody.unshift(snakeSegment);
 }
 
@@ -86,59 +97,50 @@ const drawBody = () => {
         ctx.lineWidth = 1;
         ctx.strokeRect(elem.bodyPosX, elem.bodyPosY, elem.width, elem.height);
     });
-    if (snakeBody.length > snakeBodyLength)
+    if (snakeBody.length > snake.length)
         snakeBody.pop();
 }
 
-class SnakeBodySegment {
-    constructor(bodyPosX, bodyPosY, elementSize) {
-        this.bodyPosX = bodyPosX;
-        this.bodyPosY = bodyPosY;
-        this.width = elementSize;
-        this.height = elementSize;
-    }
-}
-
 const drawHead = () => {
-    if (snakePosX % gridSize === 0 && snakePosY % gridSize === 0) {
+    if (snakePosX % GRID_SIZE === 0 && snakePosY % GRID_SIZE === 0) {
         getDirection();
     }
     ctx.fillStyle = 'rgb(221, 161, 94)';
-    ctx.fillRect(snakePosX += (snakeSpeed * directionX),
-        snakePosY += (snakeSpeed * directionY),
-        elementSize,
-        elementSize);
+    ctx.fillRect(snakePosX += (snake.speed * snake.directionX),
+        snakePosY += (snake.speed * snake.directionY),
+        GRID_SIZE,
+        GRID_SIZE);
     ctx.strokeStyle = 'rgb(241, 201, 114)';
     ctx.lineWidth = 1;
-    ctx.strokeRect(snakePosX, snakePosY, elementSize, elementSize);
+    ctx.strokeRect(snakePosX, snakePosY, GRID_SIZE, GRID_SIZE);
 }
 
 const getDirection = () => {
     window.addEventListener('keydown', (e) => {
         switch (e.code) {
             case 'ArrowUp':
-                directionX = 0;
-                if (directionY === 1) {
+                snake.directionX = 0;
+                if (snake.directionY === 1) {
                     return;
-                } else directionY = -1;
+                } else snake.directionY = -1;
                 break;
             case 'ArrowDown':
-                directionX = 0;
-                if (directionY === -1) {
+                snake.directionX = 0;
+                if (snake.directionY === -1) {
                     return;
-                } else directionY = 1;
+                } else snake.directionY = 1;
                 break;
             case 'ArrowLeft':
-                directionY = 0;
-                if (directionX === 1) {
+                snake.directionY = 0;
+                if (snake.directionX === 1) {
                     return;
-                } else directionX = -1;
+                } else snake.directionX = -1;
                 break;
             case 'ArrowRight':
-                directionY = 0;
-                if (directionX === -1) {
+                snake.directionY = 0;
+                if (snake.directionX === -1) {
                     return;
-                } else directionX = 1;
+                } else snake.directionX = 1;
                 break;
             default:
                 console.log('Ignored');
@@ -148,71 +150,57 @@ const getDirection = () => {
 }
 
 const drawApple = () => {
-    snakeBody.forEach((elem) => {
-        bodyPosX = elem.bodyPosX;
-        bodyPosY = elem.bodyPosY;
-        if (applePosX === bodyPosX && applePosY === bodyPosY) {
-            randomX();
-            randomY();
+    snakeBody.forEach(({ bodyPosX, bodyPosY }) => {
+        if (apple.x === bodyPosX && apple.y === bodyPosY) {
+            getRandomApplePos();
         } else {
             ctx.fillStyle = 'red'
             ctx.strokeStyle = 'red';
             ctx.beginPath();
-            ctx.arc(applePosX + (elementSize / 2), applePosY + (elementSize / 2), elementSize / 2, 0, 2 * Math.PI, true);
+            ctx.arc(apple.x + (GRID_SIZE / 2), apple.y + (GRID_SIZE / 2), GRID_SIZE / 2, 0, 2 * Math.PI, true);
             ctx.stroke();
             ctx.fill();
         }
     });
 }
 
-const randomX = () => {
-    applePosX = Math.floor(Math.random() * (canvas.width / gridSize)) * (gridSize);
-    if (applePosX < gridSize || applePosX === (canvas.width - gridSize)) {
-        randomX();
-    }
-}
-
-const randomY = () => {
-    applePosY = Math.floor(Math.random() * (canvas.height / gridSize)) * (gridSize);
-    if (applePosY < gridSize || applePosY === (canvas.height - gridSize)) {
-        randomY();
+const getRandomApplePos = () => {
+    apple.x = Math.floor(Math.random() * (canvas.width / GRID_SIZE)) * (GRID_SIZE);
+    apple.y = Math.floor(Math.random() * (canvas.height / GRID_SIZE)) * (GRID_SIZE);
+    if (apple.x < GRID_SIZE || apple.x === (canvas.width - GRID_SIZE) || apple.y < GRID_SIZE || apple.y === (canvas.height - GRID_SIZE)) {
+        getRandomApplePos();
     }
 }
 
 const boundaryCheck = () => {
     if (snakePosX < 0 || snakePosX === canvas.width) {
         gameOver = true;
-        snakeSpeed = -snakeSpeed;
+        snake.speed = -snake.speed;
     }
     if (snakePosY < 0 || snakePosY === canvas.height) {
         gameOver = true;
-        snakeSpeed = -snakeSpeed;
+        snake.speed = -snake.speed;
     }
 }
 
 const appleCheck = () => {
-    if (snakePosX === applePosX && snakePosY === applePosY) {
-        randomX();
-        randomY();
-        snakeBodyLength += 1;
+    if (snakePosX === apple.x && snakePosY === apple.y) {
+        getRandomApplePos();
+        snake.length += 1;
         score++;
         scoreBoard.textContent = `SCORE: ${score}`;
     }
 }
 
 const bodyCheck = () => {
-    snakeBody.forEach((elem) => {
-        bodyPosX = elem.bodyPosX;
-        bodyPosY = elem.bodyPosY;
-        if (directionX === 0 && directionY === 0) {
+    snakeBody.forEach(({ bodyPosX, bodyPosY }) => {
+        if (snake.directionX === 0 && snake.directionY === 0) {
             return;
         } else if (snakePosY === bodyPosY && snakePosX === bodyPosX) {
             gameOver = true;
         }
     });
 }
-
-
 
 const createLocalStorage = () => {
     if (savedScore === null) {
@@ -258,9 +246,8 @@ const playGame = () => {
         appleCheck();
         bodyCheck();
         checkGameOver();
-    }, 1000 / framesPerSecond);
-    randomX();
-    randomY();
+    }, 1000 / FRAMES_PER_SECOND);
+    getRandomApplePos();
 }
 
 window.onload = () => {
