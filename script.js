@@ -34,6 +34,8 @@ class SnakeBodySegment {
 let snakeBody = [];
 
 let snake = {
+    moveX: 0,
+    moveY: 0,
     directionX: 0,
     directionY: 0,
     speed: 20,
@@ -116,6 +118,9 @@ const drawHead = () => {
 }
 
 const moveSnake = () => {
+
+
+
     window.addEventListener('keydown', (e) => {
         switch (e.code) {
             case 'ArrowUp':
