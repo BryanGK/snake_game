@@ -12,4 +12,4 @@ This was one of the first games I've made, and certainly the best I've made so f
 
 ## Author
 
-Bryan Krauss - Full Stack Software Developer - [LinkedIn](https://www.linkedin.com/in/bryan-krauss-556b3a200/)
+Bryan Krauss - Full Stack Software Developer - [LinkedIn](https://www.linkedin.com/in/bryan-krauss-556b3a200/) | [Portfolio Website](https://bryankrauss.ca)
