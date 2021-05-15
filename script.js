@@ -175,11 +175,9 @@ const getRandomApplePos = () => {
 const boundaryCheck = () => {
     if (snakePosX < 0 || snakePosX === canvas.width) {
         gameOver = true;
-        snake.speed = -snake.speed;
     }
     if (snakePosY < 0 || snakePosY === canvas.height) {
         gameOver = true;
-        snake.speed = -snake.speed;
     }
 }
 
@@ -234,7 +232,6 @@ window.addEventListener('keydown', (e) => {
         score = 0;
     }
 });
-
 
 const playGame = () => {
     setInterval(function () {
