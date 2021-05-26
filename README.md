@@ -8,7 +8,7 @@
 
 ## Summary
 
-This was one of the first games I've made, and certainly the best I've made so far. Chase the apples aronud the game board while the snake gets bigger. The app will also save your last games score and high score in local storage. Have fun with my game and DM your high score!
+A Javascript and HTML Canvas game, using object-oriented programming priciples and game logic. Chase the apples aronud the game board while the snake gets bigger. The app will also save your last games score and high score in local storage. Have fun with my game and DM your high score!
 
 ## Author
 
